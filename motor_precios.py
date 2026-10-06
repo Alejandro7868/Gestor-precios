@@ -22,6 +22,7 @@ params = urllib.parse.quote_plus(
     f"SERVER={DB_HOST};"
     f"DATABASE={DB_NAME};"
     f"Trusted_Connection=yes;"
+    f"TrustServerCertificate=yes;"
 )
 engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
 
@@ -282,7 +283,20 @@ def procesar_reportes(df_precios: pd.DataFrame, df_inventario: pd.DataFrame, out
 
     archivos_generados = []
     fecha_actual = datetime.now()
-    fecha_header = fecha_actual.strftime('%d MAYO %Y').upper()
+    
+    # Diccionario de traducción de meses al español
+    meses_espanol = {
+        1: "ENERO", 2: "FEBRERO", 3: "MARZO", 4: "ABRIL", 
+        5: "MAYO", 6: "JUNIO", 7: "JULIO", 8: "AGOSTO", 
+        9: "SEPTIEMBRE", 10: "OCTUBRE", 11: "NOVIEMBRE", 12: "DICIEMBRE"
+    }
+    
+    # Formateo dinámico: Extrae el día a dos dígitos, busca el mes y agrega el año
+    dia = str(fecha_actual.day).zfill(2)
+    mes = meses_espanol[fecha_actual.month]
+    ano = fecha_actual.year
+    
+    fecha_header = f"{dia} {mes} {ano}"
 
     # --- REPORTE GENERAL ---
     if not pivot.empty:

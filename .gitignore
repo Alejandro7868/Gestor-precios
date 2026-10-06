@@ -24,3 +24,5 @@ _pycache_/
 *.xlsx
 *.csv
 *.bak
+uploads/
+output/

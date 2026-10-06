@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-pandas
-openpyxl
+pandas==2.2.2
+numpy==1.26.4
 sqlalchemy
 pyodbc
-python-multipart
 python-dotenv
+openpyxl
+python-multipart

@@ -1,105 +1,93 @@
 # 📊 Gestor de Precios Automático
 
-Este proyecto es una aplicación Full-Stack local diseñada para automatizar el cruce masivo de listas de precios de venta con los niveles de inventario. Incluye validaciones y reglas de negocio dinámicas, permitiendo a la fuerza de ventas exportar de forma instantánea reportes en Excel con un diseño corporativo premium.
+## 1. Información General
+- **Nombre del proyecto:** Gestor de Precios Automático.
+- **Descripción:** Plataforma local con arquitectura web para el cruce, procesamiento y generación de reportes masivos en Excel.
+- **Propósito del sistema:** Automatizar la creación de listas de precios categorizadas y formateadas para el equipo de ventas.
+- **Problema que resuelve:** Elimina el trabajo manual de cruzar el inventario en bruto (proveniente de ERP SIESA) con las listas de precios, aplicando reglas de negocio estrictas (filtrar productos obsoletos, validar stock/UM) y separando automáticamente los reportes por cada asesor comercial y sus regiones asignadas.
+- **Usuarios/Áreas:** Área Comercial, Coordinación de Ventas, Analistas de Inventario.
+- **Estado actual:** FUNCIONAL Y ESTABLE (Fase de Producción).
+- **Alcance actual:** Cruce de inventario vs precios, motor de reglas automáticas, módulo de "rescate" de productos omitidos (UI stateless), exportación automatizada con formateo corporativo (Openpyxl) y dual-header regional.
 
----
+## 2. Stack Tecnológico
+**Backend & Procesamiento:**
+- **Lenguaje:** Python (3.8 a 3.12).
+- **Framework API:** FastAPI.
+- **Servidor Web:** Uvicorn.
+- **Manejo de Datos:** Pandas, Numpy.
+- **Generación Excel:** openpyxl.
+- **Base de Datos:** Microsoft SQL Server (Express 2022/2025 o LocalDB).
+- **Conexión a BD:** SQLAlchemy, pyodbc.
 
-## 🚀 Características Principales
+**Frontend:**
+- **Lenguaje:** HTML5, CSS3, JavaScript (Vanilla).
+- **Consumo de API:** Fetch API nativa y uso de FormData.
+- **Diseño:** CSS Custom (Glassmorphism), UI Responsiva.
 
-- **Procesamiento Masivo:** Utiliza **Pandas** para cruzar rápidamente miles de registros y crear tablas dinámicas pivotadas.
-- **Flujo de Rescate (Excepciones):** Sistema *stateless* de 2 pasos. En el primer paso, el sistema analiza e informa qué productos se excluyeron por falta de inventario o reglas. En el segundo paso, permite al usuario "rescatar" dichos productos de manera manual mediante un buscador predictivo interactivo.
-- **Filtros Avanzados:** Exclusión automática de productos obsoletos (que inician con "NO-") y depuración de listas obsoletas.
-- **Diseño Excel Premium:** Exportación vía **openpyxl** implementando:
-  - Doble Encabezado (Dual Header) mapeando los códigos comerciales numéricos hacia nombres reales (Ej. *03 -> ABASTOS*).
-  - Agrupación por categoría (LINEA) con filas divisorias estilizadas.
-  - Formato estricto de celdas financieras (`$X,XXX`) en los precios.
-  - Auto-ajuste de columnas de extremo a extremo.
-- **Auditoría en Base de Datos:** Guarda un histórico (log) de todos los precios reportados a los asesores comerciales en **SQL Server**.
+## 3. Arquitectura y Módulos
+*Toda la información profunda sobre arquitectura se encuentra en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) y [docs/MODULES.md](docs/MODULES.md).*
 
----
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Backend / API:** Python 3 + FastAPI.
-- **Procesamiento de Datos:** Pandas.
-- **Base de Datos:** Microsoft SQL Server (LocalDB / SQLEXPRESS) conectado vía SQLAlchemy + `pyodbc`.
-- **Exportación Excel:** openpyxl.
-- **Frontend:** Vanilla HTML5, CSS3 (Glassmorphism), JavaScript puro con Fetch API.
-
----
-
-## 📋 Requisitos del Sistema
-
-1. **Python 3.8+** instalado.
-2. **Microsoft SQL Server** local instalado (SQLEXPRESS) o LocalDB.
-3. **ODBC Driver 17 for SQL Server** instalado en el sistema operativo (Requerido por `pyodbc`).
-4. Archivos Excel de insumo estructurados (Lista de Precios e Inventario).
-
----
-
-## ⚙️ Instalación y Configuración
-
-### 1. Clonar o descargar el repositorio
-Ubicarse en la carpeta raíz del proyecto (ej. `Gestor-precios`).
-
-### 2. Configurar la Base de Datos SQL
-Debes crear la estructura de datos. Para ello, ejecuta en **SQL Server Management Studio (SSMS)** el script que se encuentra en la raíz del proyecto:
-```sql
--- Ejecutar el contenido del archivo database.sql
-```
-Asegúrate de poblar manualmente las tablas `Maestro_Asesores`, `Maestro_Impuestos` y `Maestro_Listas` para que el sistema tenga contra qué cruzar las asignaciones.
-
-### 3. Instalar Dependencias de Python
-Abre tu consola o terminal y ejecuta:
-```bash
-pip install -r requirements.txt
+## 4. Estructura del Proyecto
+```text
+/Gestor-precios
+├── .env                    # (No versionado) Variables de entorno BD.
+├── database.sql            # Script DDL para construir la base de datos vacía.
+├── datos_maestros.sql      # Script DML con la configuración maestra de asesores, listas e impuestos.
+├── dump_db.py              # Script utilitario (creado durante el desarrollo) para extraer datos.
+├── main.py                 # Punto de entrada FastAPI, endpoints de carga, análisis y descarga.
+├── motor_precios.py        # Core de negocio: Funciones de pandas, merge, reglas y openpyxl.
+├── requirements.txt        # Dependencias de Python.
+├── README.md               # Este documento principal.
+├── HANDOVER.md             # Documento de entrega formal y checklist.
+├── /docs                   # Documentación técnica extendida.
+│   ├── ARCHITECTURE.md     # Arquitectura, decisiones, integraciones.
+│   ├── DATABASE.md         # Esquema de base de datos.
+│   ├── MODULES.md          # Especificación de módulos, roles y flujos de negocio.
+│   └── TROUBLESHOOTING.md  # Solución de errores (Error 26, TrustServerCertificate, Bugs UI).
+├── /output                 # Directorio temporal de Excels finales (se auto-crea).
+├── /static                 # Frontend.
+│   └── index.html          # Interfaz de usuario SPA.
+└── /uploads                # Directorio temporal de archivos subidos (se auto-crea).
 ```
 
-### 4. Variables de Entorno (Opcional)
-Puedes crear un archivo `.env` en la raíz si deseas parametrizar la base de datos sin tocar el código de conexión en `motor_precios.py`:
+## 5. Instalación del Proyecto
+
+### Requisitos Previos
+- Python 3.8 - 3.12 (Asegurar opción "Add Python to PATH" durante la instalación).
+- Microsoft SQL Server (Express o LocalDB).
+- ODBC Driver 17 for SQL Server instalado en Windows.
+
+### Configuración de Base de Datos y Variables (`.env`)
+1. Abrir **SQL Server Management Studio (SSMS)** y conectarse al servidor local.
+2. Ejecutar primero `database.sql` y luego `datos_maestros.sql`.
+3. Crear un archivo `.env` en la raíz del proyecto.
+   *(Nota de seguridad: Quien instale debe definir la IP/Instancia correcta)*.
 ```env
-DB_HOST=(localdb)\MSSQLLocalDB  # o .\SQLEXPRESS
+DB_HOST=.\SQLEXPRESS
 DB_NAME=GestorPrecios
+# DB_USER= (PENDIENTE DE VALIDAR si se requiere en entorno red)
+# DB_PASSWORD= (PENDIENTE DE VALIDAR)
 ```
 
----
-
-## 🏃 Cómo Ejecutar el Proyecto
-
-1. Inicia el servidor de FastAPI:
+### Comandos de Instalación
+Abrir terminal en la carpeta raíz:
 ```bash
+# 1. Instalar dependencias
+pip install -r requirements.txt
+
+# 2. Ejecutar servidor de desarrollo/producción local
 uvicorn main:app --reload
 ```
-2. Abre tu navegador web favorito y accede a:
-```
-http://localhost:8000
-```
-*(FastAPI servirá la interfaz gráfica local alojada en la carpeta `static/` directamente sobre esta ruta).*
+Acceder a la aplicación ingresando a `http://localhost:8000` en el navegador.
+
+## 6. Despliegue, Backups y Mantenimiento
+
+- **Despliegue actual:** El sistema corre como un servicio/script On-Premise en un equipo local de la oficina. Para futuras migraciones a un servidor en la nube (AWS/Azure), se debe empaquetar en Docker o desplegar detrás de un proxy reverso (Nginx) y actualizar el `.env`.
+- **Backups (Base de datos):** Programar en SSMS un *Maintenance Plan* para realizar backups (`.bak`) semanales de `GestorPrecios`. 
+- **Backups (Código):** Empujar cambios periódicamente a un repositorio Git corporativo.
+- **Mantenimiento Técnico:**
+  - **Limpieza de Archivos:** Las carpetas `uploads/` se autolimpian mediante bloques `finally`. Los archivos en `output/` son sobreescritos o pueden requerir purga manual periódica o vía Cron Job de Windows.
+  - **Librerías:** Monitorear actualizaciones críticas de Pandas o FastAPI anualmente (`pip list --outdated`).
 
 ---
-
-## 📖 Manual de Uso (Interfaz)
-
-1. **Pantalla de Carga:** Sube ambos archivos de Excel generados desde tu ERP (El sistema espera las columnas exactas descritas en tu lógica de negocio).
-2. **Botón Analizar:** Al darle clic, los datos viajan a la ruta `/api/analizar`.
-3. **Bandeja de Excepciones:** La aplicación arrojará un resumen informándote cuántos productos se omitieron.
-   - Utiliza el buscador predictivo para buscar productos faltantes y rescatarlos (se añadirán como *chips* o *tags* azules).
-   - Alternativamente, pega los códigos de producto separados por comas en la bandeja de carga rápida.
-4. **Procesar:** Haz clic en **Generar Reportes Definitivos**. La UI reenviará los excels originales sumando el arreglo de excepciones.
-5. **Descarga:** Aparecerán los enlaces de descarga de Excel, listos para distribuir.
-
----
-
-## 📁 Arquitectura y Estructura de Directorios
-
-```plaintext
-/Gestor-precios
-├── main.py              # Enrutador principal de FastAPI y limpieza segura finally.
-├── motor_precios.py     # Lógica Core (Pandas + DB Queries + Openpyxl).
-├── database.sql         # Script DDL de la BD en SQL Server.
-├── requirements.txt     # Dependencias del proyecto.
-├── /static
-│   └── index.html       # UI Full-Stack moderno en HTML/JS/CSS.
-├── /uploads             # Carpeta temporal para los archivos en análisis.
-└── /output              # Carpeta de salida de los Excel procesados.
-```
+**Explora las carpetas `/docs` y el `HANDOVER.md` para el cierre completo.**
